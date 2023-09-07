@@ -4,3 +4,6 @@ __pycache__/
 
 # Ignore all CSV files
 *.csv
+
+# Virtual environmnet folder
+bbc_good_food_venv/
