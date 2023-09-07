@@ -53,13 +53,14 @@ page_list = list(range(1, number_of_pages + 1))
 
 # List and Dict for storage
 used_recipe_links = []
+successful_links = []
 recipe_names = []
 recipe_cooking_times = []
 recipe_nutritional_values = {}
 recipe_category_information = {}
 
 # Variable to store number of iterations through recipe links to keep lists up to date if anything needs deleting
-iteration_counter = 0
+index = 0
 
 # Loop through the base pages
 for page_number in page_list:
@@ -126,9 +127,12 @@ for page_number in page_list:
                         recipe_category_information[category].append(status)
                     else:
                         recipe_category_information[category] = [status]
+                
+                # Add the link to successful list to be added to a dataframe
+                successful_links.append(link)
 
-                # Add the link to the used links list
-                used_recipe_links.append(link)
+                # Add one to the iteration counter
+                index += 1
 
                 # Break the retry loop if the request is successful
                 break
@@ -139,10 +143,13 @@ for page_number in page_list:
                     time.sleep(retry_delay)
                 else:
                     print(f"Max retry attempts reached for {link}. Moving on to the next link.")
-                    del recipe_names[iteration_counter]  # Need to remove recipe name and cooking time or everything after will be mismatched
-                    del recipe_cooking_times[iteration_counter]
+                    del recipe_names[index]  # Need to remove recipe name and cooking time or everything after will be mismatched
+                    del recipe_cooking_times[index]
                     break
-        iteration_counter += 1
+
+        # Add the link to the used links list
+        used_recipe_links.append(link)
+
         # Add a delay of 1 second between requests (outside of the retry loop)
         time.sleep(1)
 
