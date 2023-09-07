@@ -184,7 +184,7 @@ for name, values in recipe_nutritional_values.items():
 
 
 # Create a DataFrame for recipe names and links
-recipe_names_df = pd.DataFrame({'Recipe Name': recipe_names, 'Recipe Link': used_recipe_links})
+recipe_names_df = pd.DataFrame({'Recipe Name': recipe_names, 'Recipe Link': successful_links})
 
 # Create a DataFrame for cooking times
 cooking_time_df = pd.DataFrame({'Cooking Time (HH:mm)': cooking_times_HH_mm})
