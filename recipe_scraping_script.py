@@ -64,6 +64,7 @@ index = 0
 
 # Loop through the base pages
 for page_number in page_list:
+    print(f'Scraping page {page_number} of {page_list[-1]}...')
     page_url = filtered_page_url + '&page=' + str(page_number)
 
     for attempt in range(max_retries):
@@ -155,6 +156,8 @@ for page_number in page_list:
 
 
 # Transform cooking times into HH:mm
+print('Transforming data...')
+
 cooking_times_HH_mm = []
 
 for time_str in recipe_cooking_times:
@@ -184,6 +187,8 @@ for name, values in recipe_nutritional_values.items():
 
 
 # Create a DataFrame for recipe names and links
+print('Creating CSV files...')
+
 recipe_names_df = pd.DataFrame({'Recipe Name': recipe_names, 'Recipe Link': successful_links})
 
 # Create a DataFrame for cooking times
@@ -213,3 +218,5 @@ recipe_names_df.to_csv(recipe_names_csv, index=False)
 cooking_time_df.to_csv(cooking_time_csv, index=False)
 nutrition_df.to_csv(nutrition_csv, index=False)
 categories_df.to_csv(categories_csv, index=False)
+
+print('Scraping completed.')
