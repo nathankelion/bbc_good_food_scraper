@@ -2,7 +2,8 @@
 __pycache__/
 *.pyc
 
-# Ignore all CSV files except in the 'output' folder
+# Ignore all CSV files
 *.csv
-!/output/
 
+# Except for CSV files in the 'output' directory
+!/output/*.csv
