@@ -43,7 +43,10 @@ To use this package, follow these steps:
     
     If you want to keep the project's dependencies isolated from your system-wide Python installation, it's a good idea to use a virtual environment.
     ```
+    # Create virtual environment
     python -m venv bbc_good_food_venv
+
+    # Activate virtual environmnet
     bbc_good_food_venv\Scripts\activate  # On Windows
     source bbc_good_food_venv/bin/activate  # On macOS and Linux
     ```
