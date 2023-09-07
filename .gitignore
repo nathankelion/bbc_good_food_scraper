@@ -4,6 +4,3 @@ __pycache__/
 
 # Ignore all CSV files
 *.csv
-
-# Except for CSV files in the 'output' directory
-!/output/*.csv
