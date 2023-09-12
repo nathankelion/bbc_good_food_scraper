@@ -1,4 +1,3 @@
-import re
 import requests
 import time
 import math
@@ -6,8 +5,8 @@ import pandas as pd
 from bs4 import BeautifulSoup
 
 from scripts.get_recipe_links import get_recipe_links
-from scripts.get_recipe_names import get_recipe_names
-from scripts.get_recipe_cooking_times import get_recipe_cooking_times
+from scripts.get_recipe_name import get_recipe_name
+from scripts.get_recipe_cooking_time import get_recipe_cooking_time
 from scripts.get_recipe_nutritional_values import get_recipe_nutritional_values
 from scripts.get_recipe_categories import get_recipe_categories
 
@@ -48,23 +47,21 @@ number_of_recipes = int(results_list[5])
 number_of_pages = math.ceil(number_of_recipes / 30)
 
 # list of page numbers
-page_list = list(range(1, number_of_pages + 1))
-
+# page_list = list(range(1, number_of_pages + 1))
+page_list = [3]
 
 # List and Dict for storage
 used_recipe_links = []
-successful_links = []
 recipe_names = []
+successful_links = []
 recipe_cooking_times = []
 recipe_nutritional_values = {}
 recipe_category_information = {}
 
-# Variable to store number of iterations through recipe links to keep lists up to date if anything needs deleting
-index = 0
 
 # Loop through the base pages
 for page_number in page_list:
-    print(f'Scraping page {page_number} of {page_list[-1]}...')
+    print(f'Scraping page {page_number} of {len(page_list)}...')
     page_url = filtered_page_url + '&page=' + str(page_number)
 
     for attempt in range(max_retries):
@@ -95,14 +92,6 @@ for page_number in page_list:
         if link not in used_recipe_links:
             new_recipe_links.append(link)
 
-    # Create a list of recipe names and cooking times
-    recipes = get_recipe_names(soup)
-    cooking_times = get_recipe_cooking_times(soup)
-    for recipe, cooking_time in zip(recipes, cooking_times):
-        if recipe not in recipe_names and 'App only' not in recipe:
-            recipe_names.append(recipe)
-            recipe_cooking_times.append(cooking_time)
-
 
     # Loop through the recipe link list sending GET requests and parsing the HTML of specific recipes
     for link in new_recipe_links:
@@ -111,6 +100,12 @@ for page_number in page_list:
                 recipe_response = requests.get(link)
                 recipe_response.raise_for_status()
                 recipe_soup = BeautifulSoup(recipe_response.content, 'html.parser')
+
+                recipe_name = get_recipe_name(recipe_soup)
+                recipe_names.append(recipe_name)
+
+                recipe_cooking_time = get_recipe_cooking_time(recipe_response)
+                recipe_cooking_times.append(recipe_cooking_time)
 
                 nutrition_name, nutrition_values = get_recipe_nutritional_values(recipe_soup)
                 categories = get_recipe_categories(recipe_soup)
@@ -128,12 +123,9 @@ for page_number in page_list:
                         recipe_category_information[category].append(status)
                     else:
                         recipe_category_information[category] = [status]
-                
-                # Add the link to successful list to be added to a dataframe
-                successful_links.append(link)
 
-                # Add one to the iteration counter
-                index += 1
+                # Add link to successful_links list
+                successful_links.append(link)
 
                 # Break the retry loop if the request is successful
                 break
@@ -144,8 +136,6 @@ for page_number in page_list:
                     time.sleep(retry_delay)
                 else:
                     print(f"Max retry attempts reached for {link}. Moving on to the next link.")
-                    del recipe_names[index]  # Need to remove recipe name and cooking time or everything after will be mismatched
-                    del recipe_cooking_times[index]
                     break
 
         # Add the link to the used links list
@@ -155,27 +145,7 @@ for page_number in page_list:
         time.sleep(1)
 
 
-# Transform cooking times into HH:mm
 print('Transforming data...')
-
-cooking_times_HH_mm = []
-
-for time_str in recipe_cooking_times:
-    hours, minutes = 0, 0
-    
-    # Check for hours and extract the numeric value
-    match_hr = re.search(r'(\d+) hr', time_str)
-    if match_hr:
-        hours = int(match_hr.group(1))
-    
-    # Check for minutes and extract the numeric value
-    match_min = re.search(r'(\d+) mins', time_str)
-    if match_min:
-        minutes = int(match_min.group(1))
-    
-    # Convert to HH:mm format
-    hh_mm_format = f'{hours:02d}:{minutes:02d}'
-    cooking_times_HH_mm.append(hh_mm_format)
 
 # Transform the recipe_nutritional_values dict
 clean_recipe_nutritional_values = {}
@@ -189,10 +159,19 @@ for name, values in recipe_nutritional_values.items():
 # Create a DataFrame for recipe names and links
 print('Creating CSV files...')
 
+# Test print statements
+print(f'''
+        names list is {len(recipe_names)}
+        links list {len(successful_links)}
+        time list {len(recipe_cooking_times)}
+        nutritional list {len(clean_recipe_nutritional_values['kcal'])}
+        category list {len(recipe_category_information['Diet'])}
+      ''')
+
 recipe_names_df = pd.DataFrame({'Recipe Name': recipe_names, 'Recipe Link': successful_links})
 
 # Create a DataFrame for cooking times
-cooking_time_df = pd.DataFrame({'Cooking Time (HH:mm)': cooking_times_HH_mm})
+cooking_time_df = pd.DataFrame({'Cooking Time (HH:mm)': recipe_cooking_times})
 
 # Create a DataFrame for nutrition
 nutrition_df = pd.DataFrame(clean_recipe_nutritional_values)
