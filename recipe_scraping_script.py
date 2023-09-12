@@ -49,13 +49,15 @@ number_of_pages = math.ceil(number_of_recipes / 30)
 # list of page numbers
 page_list = list(range(1, number_of_pages + 1))
 
+
 # List and Dict for storage
 used_recipe_links = []
 recipe_names = []
 successful_links = []
 recipe_cooking_times = []
-recipe_nutritional_values = {}
+recipe_nutritional_data = []
 recipe_category_information = {}
+nutritional_desired_keys = ["kcal", "fat", "saturates", "carbs", "sugars", "fibre", "protein", "salt"]
 
 
 # Loop through the base pages
@@ -109,12 +111,16 @@ for page_number in page_list:
                 nutrition_name, nutrition_values = get_recipe_nutritional_values(recipe_soup)
                 categories = get_recipe_categories(recipe_soup)
 
+                # Create an empty dictionary for the current recipe nutrition
+                recipe_nutritional_values = {key: None for key in nutritional_desired_keys}
+
                 # Fill in the dictionary of recipe nutritional values
                 for name, value in zip(nutrition_name, nutrition_values):
                     if name.text in recipe_nutritional_values:
-                        recipe_nutritional_values[name.text].append(value.text)
-                    else:
-                        recipe_nutritional_values[name.text] = [value.text]
+                        recipe_nutritional_values[name.text] = value.text
+
+                # Add the dictionary for the current recipe to the list
+                recipe_nutritional_data.append(recipe_nutritional_values)
 
                 # Fill in the dictionary of recipe category information
                 for category, status in categories.items():
@@ -146,14 +152,38 @@ for page_number in page_list:
 
 print('Transforming data...')
 
-# Transform the recipe_nutritional_values dict
-clean_recipe_nutritional_values = {}
-for name, values in recipe_nutritional_values.items():
-    if name == 'kcal':
-        clean_recipe_nutritional_values[name] = values
-    else:
-        clean_recipe_nutritional_values[name.capitalize() + ' (g)'] = [value[:-1] for value in values]
+# Initialize the combined dictionary with keys
+keys = ["kcal", "fat", "saturates", "carbs", "sugars", "fibre", "protein", "salt"]
+clean_recipe_nutritional_values = {key: [] for key in keys}
 
+# Iterate through the list of dictionaries
+for recipe_data in recipe_nutritional_data:
+    for key in keys:
+        value = recipe_data.get(key)
+        if value is None:
+            clean_recipe_nutritional_values[key].append(None)
+        else:
+            if key != 'kcal':
+                value = value[:-1]  # Remove 'g' from values
+            clean_recipe_nutritional_values[key].append(value)
+
+# Rename the keys
+final_nutrition_dict = {
+    "kcal": "kcal",
+    "fat": "Fat (g)",
+    "saturates": "Saturates (g)",
+    "carbs": "Carbs (g)",
+    "sugars": "Sugars (g)",
+    "fibre": "Fibre (g)",
+    "protein": "Protein (g)",
+    "salt": "Salt (g)",
+}
+
+# Apply the key renaming to the dictionary
+final_nutrition_dict = {
+    final_nutrition_dict[key]: values
+    for key, values in clean_recipe_nutritional_values.items()
+}
 
 # Create a DataFrame for recipe names and links
 print('Creating CSV files...')
@@ -164,7 +194,7 @@ recipe_names_df = pd.DataFrame({'Recipe Name': recipe_names, 'Recipe Link': succ
 cooking_time_df = pd.DataFrame({'Cooking Time (HH:mm)': recipe_cooking_times})
 
 # Create a DataFrame for nutrition
-nutrition_df = pd.DataFrame(clean_recipe_nutritional_values)
+nutrition_df = pd.DataFrame(final_nutrition_dict)
 
 # Create a DataFrame for categories
 categories_df = pd.DataFrame(recipe_category_information)
