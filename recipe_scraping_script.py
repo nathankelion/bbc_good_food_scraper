@@ -47,8 +47,7 @@ number_of_recipes = int(results_list[5])
 number_of_pages = math.ceil(number_of_recipes / 30)
 
 # list of page numbers
-# page_list = list(range(1, number_of_pages + 1))
-page_list = [3]
+page_list = list(range(1, number_of_pages + 1))
 
 # List and Dict for storage
 used_recipe_links = []
@@ -158,15 +157,6 @@ for name, values in recipe_nutritional_values.items():
 
 # Create a DataFrame for recipe names and links
 print('Creating CSV files...')
-
-# Test print statements
-print(f'''
-        names list is {len(recipe_names)}
-        links list {len(successful_links)}
-        time list {len(recipe_cooking_times)}
-        nutritional list {len(clean_recipe_nutritional_values['kcal'])}
-        category list {len(recipe_category_information['Diet'])}
-      ''')
 
 recipe_names_df = pd.DataFrame({'Recipe Name': recipe_names, 'Recipe Link': successful_links})
 
