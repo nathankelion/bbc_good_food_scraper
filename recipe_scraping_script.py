@@ -150,7 +150,7 @@ for page_number in page_list:
         time.sleep(1)
 
 
-print('Transforming data...')
+print('Cleaning the data...')
 
 # Initialize the combined dictionary with keys
 keys = ["kcal", "fat", "saturates", "carbs", "sugars", "fibre", "protein", "salt"]
