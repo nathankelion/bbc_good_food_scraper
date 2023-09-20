@@ -47,7 +47,8 @@ number_of_recipes = int(results_list[5])
 number_of_pages = math.ceil(number_of_recipes / 30)
 
 # list of page numbers
-page_list = list(range(1, number_of_pages + 1))
+# page_list = list(range(1, number_of_pages + 1))
+page_list = [1,2,3]
 
 
 # List and Dict for storage
@@ -152,7 +153,7 @@ for page_number in page_list:
 
 print('Cleaning the data...')
 
-# Initialize the combined dictionary with keys
+# Initialize the combined dictionary for nutrition with keys
 keys = ["kcal", "fat", "saturates", "carbs", "sugars", "fibre", "protein", "salt"]
 clean_recipe_nutritional_values = {key: [] for key in keys}
 
@@ -185,37 +186,30 @@ final_nutrition_dict = {
     for key, values in clean_recipe_nutritional_values.items()
 }
 
-# Create a DataFrame for recipe names and links
+# Create a DataFrame for recipe information
 print('Creating CSV files...')
 
-recipe_names_df = pd.DataFrame({'Recipe Name': recipe_names, 'Recipe Link': successful_links})
-
-# Create a DataFrame for cooking times
-cooking_time_df = pd.DataFrame({'Cooking Time (HH:mm)': recipe_cooking_times})
+recipe_info_data = {
+    'Recipe Name': recipe_names,
+    'Recipe Link': successful_links,
+    'Cooking Time (HH:mm)': recipe_cooking_times,
+    **recipe_category_information  # Unpack the dictionary
+}
+recipe_info_df = pd.DataFrame(recipe_info_data)
 
 # Create a DataFrame for nutrition
 nutrition_df = pd.DataFrame(final_nutrition_dict)
 
-# Create a DataFrame for categories
-categories_df = pd.DataFrame(recipe_category_information)
-
-
 # Add recipe_id column based on index to each DataFrame starting from 1
-recipe_names_df.insert(0, 'recipe_id', recipe_names_df.index + 1)
-cooking_time_df.insert(0, 'recipe_id', cooking_time_df.index + 1)
+recipe_info_df.insert(0, 'recipe_id', recipe_info_df.index + 1)
 nutrition_df.insert(0, 'recipe_id', nutrition_df.index + 1)
-categories_df.insert(0, 'recipe_id', categories_df.index + 1)
 
 # Specify the file paths for the CSV files
-recipe_names_csv = "output/recipe_names.csv"
-cooking_time_csv = "output/cooking_time.csv"
+recipe_info_csv = "output/recipe_info.csv"
 nutrition_csv = "output/nutrition.csv"
-categories_csv = "output/categories.csv"
 
 # Export DataFrames to CSV files
-recipe_names_df.to_csv(recipe_names_csv, index=False)
-cooking_time_df.to_csv(cooking_time_csv, index=False)
+recipe_info_df.to_csv(recipe_info_csv, index=False)
 nutrition_df.to_csv(nutrition_csv, index=False)
-categories_df.to_csv(categories_csv, index=False)
 
 print('Scraping completed.')
