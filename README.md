@@ -1,6 +1,6 @@
 # BBC Good Food Recipe Scraper
 
-This Python package scrapes the BBC Good Food website to extract information about recipes that match specific filters. It collects data such as recipe names, cooking times, dietary categories, difficulty levels, nutritional information, and more. The scraped data is then cleaned and stored in various CSV files within the `output` folder.
+This Python package scrapes the BBC Good Food website to extract information about recipes that match specific filters. It collects data such as recipe names, cooking times, dietary categories, difficulty levels, nutritional information, and more. The scraped data is then cleaned and stored in CSV files within the `output` folder.
 
 ## Table of Contents
 
