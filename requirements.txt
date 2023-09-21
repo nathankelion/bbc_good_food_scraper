@@ -5,3 +5,4 @@ beautifulsoup4==4.12.0
 lxml==4.9.3
 python-dotenv==1.0.0
 sqlalchemy==2.0.21
+pyodbc==4.0.39

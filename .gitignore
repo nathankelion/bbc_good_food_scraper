@@ -8,6 +8,5 @@ __pycache__/
 # Ignore the virtual environmnet folder
 bbc_good_food_venv/
 
-
 # Ignore .env file
 .env
