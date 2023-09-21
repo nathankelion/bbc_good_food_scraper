@@ -47,8 +47,7 @@ number_of_recipes = int(results_list[5])
 number_of_pages = math.ceil(number_of_recipes / 30)
 
 # list of page numbers
-# page_list = list(range(1, number_of_pages + 1))
-page_list = [1,2,3]
+page_list = list(range(1, number_of_pages + 1))
 
 
 # List and Dict for storage
