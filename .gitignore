@@ -1,9 +1,13 @@
-# Python
+# Ignore extra Python documents
 __pycache__/
 *.pyc
 
 # Ignore all CSV files
 *.csv
 
-# Virtual environmnet folder
+# Ignore the virtual environmnet folder
 bbc_good_food_venv/
+
+
+# Ignore .env file
+.env
