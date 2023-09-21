@@ -5,8 +5,7 @@ import pandas as pd
 from bs4 import BeautifulSoup
 from dotenv import load_dotenv
 import os
-from sqlalchemy import create_engine
-
+from sqlalchemy import create_engine, text
 from scripts.get_recipe_links import get_recipe_links
 from scripts.get_recipe_name import get_recipe_name
 from scripts.get_recipe_cooking_time import get_recipe_cooking_time
@@ -174,13 +173,13 @@ for recipe_data in recipe_nutritional_data:
 # Rename the keys
 final_nutrition_dict = {
     "kcal": "kcal",
-    "fat": "Fat (g)",
-    "saturates": "Saturates (g)",
-    "carbs": "Carbs (g)",
-    "sugars": "Sugars (g)",
-    "fibre": "Fibre (g)",
-    "protein": "Protein (g)",
-    "salt": "Salt (g)",
+    "fat": "Fat(g)",
+    "saturates": "Saturates(g)",
+    "carbs": "Carbs(g)",
+    "sugars": "Sugars(g)",
+    "fibre": "Fibre(g)",
+    "protein": "Protein(g)",
+    "salt": "Salt(g)",
 }
 
 # Apply the key renaming to the dictionary
@@ -193,9 +192,9 @@ final_nutrition_dict = {
 print('Connecting to Database...')
 
 recipe_info_data = {
-    'Recipe Name': recipe_names,
-    'Recipe Link': successful_links,
-    'Cooking Time (HH:mm)': recipe_cooking_times,
+    'RecipeName': recipe_names,
+    'RecipeLink': successful_links,
+    'CookingTime': recipe_cooking_times,
     **recipe_category_information  # Unpack the dictionary
 }
 recipe_info_df = pd.DataFrame(recipe_info_data)
@@ -220,19 +219,29 @@ db_password = os.getenv("DB_PASSWORD")
 # Create a SQLAlchemy engine
 connection_string = f"mssql+pyodbc://{db_user}:{db_password}@{db_host}:{db_port}/{db_name}?driver=ODBC+Driver+17+for+SQL+Server"
 engine = create_engine(connection_string)
+Conn = engine.connect()
 
-# Define your table names
+# Define table names
 recipe_info_table_name = "recipe_info"
 nutrition_table_name = "nutrition"
 
-# Insert data into SQL Server tables
-try:
-    # Assuming 'recipe_id' is a common column between DataFrames and tables
-    recipe_info_df.to_sql(recipe_info_table_name, con=engine, if_exists='replace', index=False)
-    nutrition_df.to_sql(nutrition_table_name, con=engine, if_exists='replace', index=False)
-    print("Data inserted successfully.")
-except Exception as e:
-    print(f"Error: {str(e)}")
 
-finally:
-    engine.dispose()  # Close the SQLAlchemy engine
+# # Truncate the 'nutrition' table before insertion
+# truncate_nutrition_sql = text(f'TRUNCATE TABLE {nutrition_table_name};')
+# Conn.execution_options(autocommit=True).execute(truncate_nutrition_sql)
+
+# # Truncate the 'recipe_info' table before insertion
+# truncate_recipe_info_sql = text(f'TRUNCATE TABLE {recipe_info_table_name};')
+# Conn.execution_options(autocommit=True).execute(truncate_recipe_info_sql)
+
+# Insert new data into the 'recipe_info' table
+recipe_info_df.to_sql(recipe_info_table_name, engine, if_exists='append', index=False)
+print("Data added to 'recipe_info' table successfully.")
+
+# Insert new data into the 'nutrition' table
+nutrition_df.to_sql(nutrition_table_name, engine, if_exists='append', index=False)
+print("Data replaced in 'nutrition' table successfully.")
+
+
+# Dispose of the SQLAlchemy engine to release resources
+engine.dispose()
