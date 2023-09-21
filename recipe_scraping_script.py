@@ -3,6 +3,9 @@ import time
 import math
 import pandas as pd
 from bs4 import BeautifulSoup
+from dotenv import load_dotenv
+import os
+from sqlalchemy import create_engine
 
 from scripts.get_recipe_links import get_recipe_links
 from scripts.get_recipe_name import get_recipe_name
@@ -48,7 +51,7 @@ number_of_pages = math.ceil(number_of_recipes / 30)
 
 # list of page numbers
 # page_list = list(range(1, number_of_pages + 1))
-page_list = [1,2,3]
+page_list = [1]
 
 
 # List and Dict for storage
@@ -187,7 +190,7 @@ final_nutrition_dict = {
 }
 
 # Create a DataFrame for recipe information
-print('Creating CSV files...')
+print('Connecting to Database...')
 
 recipe_info_data = {
     'Recipe Name': recipe_names,
@@ -204,12 +207,32 @@ nutrition_df = pd.DataFrame(final_nutrition_dict)
 recipe_info_df.insert(0, 'recipe_id', recipe_info_df.index + 1)
 nutrition_df.insert(0, 'recipe_id', nutrition_df.index + 1)
 
-# Specify the file paths for the CSV files
-recipe_info_csv = "output/recipe_info.csv"
-nutrition_csv = "output/nutrition.csv"
+# Load database variables from .env file
+load_dotenv()
 
-# Export DataFrames to CSV files
-recipe_info_df.to_csv(recipe_info_csv, index=False)
-nutrition_df.to_csv(nutrition_csv, index=False)
+# Access database variables
+db_host = os.getenv("DB_HOST")
+db_port = os.getenv("DB_PORT")
+db_name = os.getenv("DB_NAME")
+db_user = os.getenv("DB_USER")
+db_password = os.getenv("DB_PASSWORD")
 
-print('Scraping completed.')
+# Create a SQLAlchemy engine
+connection_string = f"mssql+pyodbc://{db_user}:{db_password}@{db_host}:{db_port}/{db_name}?driver=ODBC+Driver+17+for+SQL+Server"
+engine = create_engine(connection_string)
+
+# Define your table names
+recipe_info_table_name = "recipe_info"
+nutrition_table_name = "nutrition"
+
+# Insert data into SQL Server tables
+try:
+    # Assuming 'recipe_id' is a common column between DataFrames and tables
+    recipe_info_df.to_sql(recipe_info_table_name, con=engine, if_exists='replace', index=False)
+    nutrition_df.to_sql(nutrition_table_name, con=engine, if_exists='replace', index=False)
+    print("Data inserted successfully.")
+except Exception as e:
+    print(f"Error: {str(e)}")
+
+finally:
+    engine.dispose()  # Close the SQLAlchemy engine
