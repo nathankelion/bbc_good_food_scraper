@@ -6,6 +6,7 @@ from bs4 import BeautifulSoup
 from dotenv import load_dotenv
 import os
 from sqlalchemy import create_engine, text
+
 from scripts.get_recipe_links import get_recipe_links
 from scripts.get_recipe_name import get_recipe_name
 from scripts.get_recipe_cooking_time import get_recipe_cooking_time
@@ -49,8 +50,7 @@ number_of_recipes = int(results_list[5])
 number_of_pages = math.ceil(number_of_recipes / 30)
 
 # list of page numbers
-# page_list = list(range(1, number_of_pages + 1))
-page_list = [1]
+page_list = list(range(1, number_of_pages + 1))
 
 
 # List and Dict for storage
@@ -153,7 +153,7 @@ for page_number in page_list:
         time.sleep(1)
 
 
-print('Cleaning the data...')
+print('Transforming the data...')
 
 # Initialize the combined dictionary for nutrition with keys
 keys = ["kcal", "fat", "saturates", "carbs", "sugars", "fibre", "protein", "salt"]
@@ -225,14 +225,18 @@ Conn = engine.connect()
 recipe_info_table_name = "recipe_info"
 nutrition_table_name = "nutrition"
 
+trans = Conn.begin()
 
-# # Truncate the 'nutrition' table before insertion
-# truncate_nutrition_sql = text(f'TRUNCATE TABLE {nutrition_table_name};')
-# Conn.execution_options(autocommit=True).execute(truncate_nutrition_sql)
+# Define the SQL statement to truncate the 'nutrition' and 'recipe_info' tables
+delete_sql = text('DELETE FROM nutrition')
+truncate_sql = text('DELETE FROM recipe_info')
 
-# # Truncate the 'recipe_info' table before insertion
-# truncate_recipe_info_sql = text(f'TRUNCATE TABLE {recipe_info_table_name};')
-# Conn.execution_options(autocommit=True).execute(truncate_recipe_info_sql)
+# Execute the SQL statement
+Conn.execute(delete_sql)
+Conn.execute(truncate_sql)
+
+# Commit the transaction
+trans.commit()
 
 # Insert new data into the 'recipe_info' table
 recipe_info_df.to_sql(recipe_info_table_name, engine, if_exists='append', index=False)
@@ -240,8 +244,7 @@ print("Data added to 'recipe_info' table successfully.")
 
 # Insert new data into the 'nutrition' table
 nutrition_df.to_sql(nutrition_table_name, engine, if_exists='append', index=False)
-print("Data replaced in 'nutrition' table successfully.")
-
+print("Data added to 'nutrition' table successfully.")
 
 # Dispose of the SQLAlchemy engine to release resources
 engine.dispose()
