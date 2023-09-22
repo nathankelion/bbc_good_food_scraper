@@ -1,11 +1,8 @@
-USE BBC_Good_Food
-GO
+USE BBC_Good_Food;
 
 -- Drop tables if they exist
-DROP TABLE IF EXISTS nutrition
-GO
-DROP TABLE IF EXISTS recipe_info
-GO
+DROP TABLE IF EXISTS nutrition;
+DROP TABLE IF EXISTS recipe_info;
 
 -- Create the recipe_info table
 CREATE TABLE recipe_info (
@@ -16,8 +13,7 @@ CREATE TABLE recipe_info (
     HealthStatus	VARCHAR(15),
 	Diet			VARCHAR(15),
 	Difficulty		VARCHAR(15)
-)
-GO
+);
 
 -- Create the nutrition table
 CREATE TABLE nutrition (
