@@ -9,9 +9,9 @@ def get_recipe_categories(soup):
         category_text.append(category.text)
 
     if 'Healthy' in category_text:
-        categories_dict['Health Status'] = 'Healthy'
+        categories_dict['HealthStatus'] = 'Healthy'
     else:
-        categories_dict['Health Status'] = None
+        categories_dict['HealthStatus'] = None
         
     if 'Vegan' in category_text:
         categories_dict['Diet'] = 'Vegan'
