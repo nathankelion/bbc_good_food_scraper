@@ -11,8 +11,8 @@ from scripts.get_recipe_nutritional_values import get_recipe_nutritional_values
 from scripts.get_recipe_categories import get_recipe_categories
 
 
-# url of the BBC Good Food recipes page with relevent filters applied (I'm only after main dishes)
-filtered_page_url = 'https://www.bbcgoodfood.com/search?tab=recipe&mealType=lunch%2Cvegetable%2Csupper%2Cpasta%2Cmain-course%2Cfish-course%2Cdinner&q=recipes%3Ddinner'
+# url of the BBC Good Food recipes page
+filtered_page_url = 'https://www.bbcgoodfood.com/search?'
 base_url = 'https://www.bbcgoodfood.com'
 
 # Define the maximum number of retry attempts and delay between retries
@@ -48,7 +48,6 @@ number_of_pages = math.ceil(number_of_recipes / 30)
 
 # list of page numbers
 page_list = list(range(1, number_of_pages + 1))
-
 
 # List and Dict for storage
 used_recipe_links = []
