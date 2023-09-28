@@ -1,6 +1,6 @@
 # BBC Good Food Recipe Scraper
 
-This Python package scrapes the BBC Good Food website to extract information about recipes that match specific filters. It collects data such as recipe names, cooking times, dietary categories, difficulty levels, nutritional information, and more. The scraped data is then cleaned and stored in CSV files within the `output` folder.
+This Python package scrapes the BBC Good Food website to extract information about recipes. It collects data such as recipe names, cooking times, dietary categories, difficulty levels, nutritional information, and more. The scraped data is then transformed and uploaded to a database hosted by AWS RDS.
 
 ## Table of Contents
 
@@ -25,7 +25,9 @@ Before you can use this package, make sure you have the following prerequisites 
 
 If pip is not installed, you can follow the [installation instructions](https://pip.pypa.io/en/stable/installation/) to install it.
 
-## Installation
+- **Microsoft SQL Server Management Studio** connected to a [free tier AWS](https://portal.aws.amazon.com/billing/signup#/start/email) RDS database instance: You can download and install SSMS from the [official Microsoft website](https://learn.microsoft.com/en-us/sql/ssms/download-sql-server-management-studio-ssms?view=sql-server-ver16) and learn how to connect the two [here](https://www.youtube.com/watch?v=vp_uulb5phM). 
+
+## Installation and Setup
 
 To use this package, follow these steps:
 
@@ -58,12 +60,23 @@ To use this package, follow these steps:
 
 ## Usage
 
+Create a file called `.env` with the following structure:
+```
+DB_HOST=
+DB_PORT=
+DB_NAME=
+DB_USER=
+DB_PASSWORD=
+```
+
+Navigate to the `/sql_code/create_tables.sql` open in SSMS and run the queries to create the tables required.
+
 To run the scraper, use the following command:
 ```
 python recipe_scraping_script.py
 ```
 
-The script will scrape data from the BBC Good Food website based on the specified filters, clean the data, and store it in the output folder as CSV files.
+The script will scrape data from the BBC Good Food website based on the specified filters, transform the data, and store it in your database hosted by AWS RDS..
 
 When you're finished with the package, you can deactivate the virtual environment by running:
 ```
@@ -71,21 +84,22 @@ deactivate
 ```
 This will return you to the system-wide Python environment.
 
+Using SQL you can search for recipes using more precise/wider range of filters
+
 ## Project Structure
 
 The project structure is as follows:
-- output/: This folder contains the CSV files where the scraped data is stored.
 - scripts/: This folder contains the Python functions used for scraping and data processing.
+- sql_code/: This folder contains the sql queries required to create the tables to store scraped data.
 - recipe_scraping_script.py: The main script for scraping BBC Good Food recipes.
 - requirements.txt: A list of required Python packages and their versions.
+- .gitignore: 
 - README.md: This file, providing information on the project and how to use it.
 
 ## Motivation
-This project was born out of my passion for health and fitness, and my desire to delve into the data to gain insights into what constitutes "healthy" eating from a nutritional perspective (at least according to the BBC). I wanted to answer questions like: Does preparing "healthy" food require more time in the kitchen? Are there significant variations in protein content among different dietary choices, and if so, do lower-protein diets still meet daily protein requirements?
+This project was born out of my passion for health and fitness, and my frustration at not being able to find recpes on the BBC Good Food website that align with specific macronutrient values. I believe that eating well should be both nutritious AND enjoyable (not just chicken and rice...).
 
-Through this project, I aim to shed light on these questions by collecting and analysing data from the BBC Good Food website. Ultimately, I plan to visualise this data with a user-friendly dashboard, making it accessible to anyone interested in understanding the nutritional landscape of recipes.
-
-If you share a curiosity about health, nutrition, and cooking, I encourage you to download and use this package to access and explore the data.
+If you share a desire to cook and eat well I encourage you to download and use this package to access and explore the recipes.
 
 
 ## Contact

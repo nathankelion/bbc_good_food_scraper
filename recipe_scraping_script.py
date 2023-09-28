@@ -3,6 +3,9 @@ import time
 import math
 import pandas as pd
 from bs4 import BeautifulSoup
+from dotenv import load_dotenv
+import os
+from sqlalchemy import create_engine, text
 
 from scripts.get_recipe_links import get_recipe_links
 from scripts.get_recipe_name import get_recipe_name
@@ -11,8 +14,8 @@ from scripts.get_recipe_nutritional_values import get_recipe_nutritional_values
 from scripts.get_recipe_categories import get_recipe_categories
 
 
-# url of the BBC Good Food recipes page with relevent filters applied (I'm only after main dishes)
-filtered_page_url = 'https://www.bbcgoodfood.com/search?tab=recipe&mealType=lunch%2Cvegetable%2Csupper%2Cpasta%2Cmain-course%2Cfish-course%2Cdinner&q=recipes%3Ddinner'
+# url of the BBC Good Food recipes page
+filtered_page_url = 'https://www.bbcgoodfood.com/search?'
 base_url = 'https://www.bbcgoodfood.com'
 
 # Define the maximum number of retry attempts and delay between retries
@@ -150,7 +153,7 @@ for page_number in page_list:
         time.sleep(1)
 
 
-print('Cleaning the data...')
+print('Transforming the data...')
 
 # Initialize the combined dictionary for nutrition with keys
 keys = ["kcal", "fat", "saturates", "carbs", "sugars", "fibre", "protein", "salt"]
@@ -170,13 +173,13 @@ for recipe_data in recipe_nutritional_data:
 # Rename the keys
 final_nutrition_dict = {
     "kcal": "kcal",
-    "fat": "Fat (g)",
-    "saturates": "Saturates (g)",
-    "carbs": "Carbs (g)",
-    "sugars": "Sugars (g)",
-    "fibre": "Fibre (g)",
-    "protein": "Protein (g)",
-    "salt": "Salt (g)",
+    "fat": "Fat(g)",
+    "saturates": "Saturates(g)",
+    "carbs": "Carbs(g)",
+    "sugars": "Sugars(g)",
+    "fibre": "Fibre(g)",
+    "protein": "Protein(g)",
+    "salt": "Salt(g)",
 }
 
 # Apply the key renaming to the dictionary
@@ -186,12 +189,12 @@ final_nutrition_dict = {
 }
 
 # Create a DataFrame for recipe information
-print('Creating CSV files...')
+print('Connecting to Database...')
 
 recipe_info_data = {
-    'Recipe Name': recipe_names,
-    'Recipe Link': successful_links,
-    'Cooking Time (HH:mm)': recipe_cooking_times,
+    'RecipeName': recipe_names,
+    'RecipeLink': successful_links,
+    'CookingTime': recipe_cooking_times,
     **recipe_category_information  # Unpack the dictionary
 }
 recipe_info_df = pd.DataFrame(recipe_info_data)
@@ -203,12 +206,45 @@ nutrition_df = pd.DataFrame(final_nutrition_dict)
 recipe_info_df.insert(0, 'recipe_id', recipe_info_df.index + 1)
 nutrition_df.insert(0, 'recipe_id', nutrition_df.index + 1)
 
-# Specify the file paths for the CSV files
-recipe_info_csv = "output/recipe_info.csv"
-nutrition_csv = "output/nutrition.csv"
+# Load database variables from .env file
+load_dotenv()
 
-# Export DataFrames to CSV files
-recipe_info_df.to_csv(recipe_info_csv, index=False)
-nutrition_df.to_csv(nutrition_csv, index=False)
+# Access database variables
+db_host = os.getenv("DB_HOST")
+db_port = os.getenv("DB_PORT")
+db_name = os.getenv("DB_NAME")
+db_user = os.getenv("DB_USER")
+db_password = os.getenv("DB_PASSWORD")
 
-print('Scraping completed.')
+# Create a SQLAlchemy engine
+connection_string = f"mssql+pyodbc://{db_user}:{db_password}@{db_host}:{db_port}/{db_name}?driver=ODBC+Driver+17+for+SQL+Server"
+engine = create_engine(connection_string)
+Conn = engine.connect()
+
+# Define table names
+recipe_info_table_name = "recipe_info"
+nutrition_table_name = "nutrition"
+
+trans = Conn.begin()
+
+# Define the SQL statement to truncate the 'nutrition' and 'recipe_info' tables
+delete_sql = text('DELETE FROM nutrition')
+truncate_sql = text('DELETE FROM recipe_info')
+
+# Execute the SQL statement
+Conn.execute(delete_sql)
+Conn.execute(truncate_sql)
+
+# Commit the transaction
+trans.commit()
+
+# Insert new data into the 'recipe_info' table
+recipe_info_df.to_sql(recipe_info_table_name, engine, if_exists='append', index=False)
+print("Data added to 'recipe_info' table successfully.")
+
+# Insert new data into the 'nutrition' table
+nutrition_df.to_sql(nutrition_table_name, engine, if_exists='append', index=False)
+print("Data added to 'nutrition' table successfully.")
+
+# Dispose of the SQLAlchemy engine to release resources
+engine.dispose()
