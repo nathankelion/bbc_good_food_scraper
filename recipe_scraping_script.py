@@ -12,6 +12,7 @@ from scripts.get_recipe_name import get_recipe_name
 from scripts.get_recipe_cooking_time import get_recipe_cooking_time
 from scripts.get_recipe_nutritional_values import get_recipe_nutritional_values
 from scripts.get_recipe_categories import get_recipe_categories
+from scripts.get_recipe_ingredients import get_recipe_ingredients
 
 
 # url of the BBC Good Food recipes page
@@ -59,6 +60,7 @@ successful_links = []
 recipe_cooking_times = []
 recipe_nutritional_data = []
 recipe_category_information = {}
+recipe_ingredients = []
 nutritional_desired_keys = ["kcal", "fat", "saturates", "carbs", "sugars", "fibre", "protein", "salt"]
 
 
@@ -111,7 +113,11 @@ for page_number in page_list:
                 recipe_cooking_times.append(recipe_cooking_time)
 
                 nutrition_name, nutrition_values = get_recipe_nutritional_values(recipe_soup)
+                
                 categories = get_recipe_categories(recipe_soup)
+
+                ingredients = get_recipe_ingredients(recipe_soup)
+                recipe_ingredients.append(ingredients)
 
                 # Create an empty dictionary for the current recipe nutrition
                 recipe_nutritional_values = {key: None for key in nutritional_desired_keys}
@@ -201,9 +207,20 @@ recipe_info_df = pd.DataFrame(recipe_info_data)
 # Create a DataFrame for nutrition
 nutrition_df = pd.DataFrame(final_nutrition_dict)
 
+# Create a DataFrame for ingredients
+    # Create a list of recipe_ids
+recipe_ids = range(1, len(recipe_ingredients) + 1)
+
+    # Flatten the list of lists and assign recipe_ids
+flattened_ingredients = [(recipe_id, ingredient) for recipe_id, ingredients in zip(recipe_ids, recipe_ingredients) for ingredient in ingredients]
+
+    # Create a DataFrame with columns "recipe_id" and "Ingredient"
+ingredients_df = pd.DataFrame(flattened_ingredients, columns=['recipe_id', 'Ingredient'])
+
 # Add recipe_id column based on index to each DataFrame starting from 1
 recipe_info_df.insert(0, 'recipe_id', recipe_info_df.index + 1)
 nutrition_df.insert(0, 'recipe_id', nutrition_df.index + 1)
+
 
 # Load database variables from .env file
 load_dotenv()
@@ -223,16 +240,19 @@ Conn = engine.connect()
 # Define table names
 recipe_info_table_name = "recipe_info"
 nutrition_table_name = "nutrition"
+ingredients_table_name = 'ingredients'
 
 trans = Conn.begin()
 
-# Define the SQL statement to truncate the 'nutrition' and 'recipe_info' tables
-delete_sql = text('DELETE FROM nutrition')
-truncate_sql = text('DELETE FROM recipe_info')
+# Define the SQL statement to delete info in the 'nutrition' and 'recipe_info' tables
+delete_ingredients = text('DELETE FROM ingredients')
+delete_nutrition = text('DELETE FROM nutrition')
+delete_recipe_info = text('DELETE FROM recipe_info')
 
 # Execute the SQL statement
-Conn.execute(delete_sql)
-Conn.execute(truncate_sql)
+Conn.execute(delete_ingredients)
+Conn.execute(delete_nutrition)
+Conn.execute(delete_recipe_info)
 
 # Commit the transaction
 trans.commit()
@@ -244,6 +264,10 @@ print("Data added to 'recipe_info' table successfully.")
 # Insert new data into the 'nutrition' table
 nutrition_df.to_sql(nutrition_table_name, engine, if_exists='append', index=False)
 print("Data added to 'nutrition' table successfully.")
+
+# Insert new data into the 'ingredients' table
+ingredients_df.to_sql(ingredients_table_name, engine, if_exists='append', index=False)
+print("Data added to 'ingredients' table successfully.")
 
 # Dispose of the SQLAlchemy engine to release resources
 engine.dispose()

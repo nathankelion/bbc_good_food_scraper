@@ -1,6 +1,7 @@
 USE BBC_Good_Food;
 
 -- Drop tables if they exist
+DROP TABLE IF EXISTS ingredients;
 DROP TABLE IF EXISTS nutrition;
 DROP TABLE IF EXISTS recipe_info;
 
@@ -26,5 +27,11 @@ CREATE TABLE nutrition (
 	[Fibre(g)]		FLOAT,
 	[Protein(g)]	FLOAT,
 	[Salt(g)]		FLOAT,
+	FOREIGN KEY (recipe_id) REFERENCES recipe_info(recipe_id)
+);
+
+CREATE TABLE ingredients (
+	recipe_id		INT NOT NULL,
+	Ingredient		VARCHAR(200)
 	FOREIGN KEY (recipe_id) REFERENCES recipe_info(recipe_id)
 );

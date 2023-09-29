@@ -1,6 +1,6 @@
 # BBC Good Food Recipe Scraper
 
-This Python package scrapes the BBC Good Food website to extract information about recipes. It collects data such as recipe names, cooking times, dietary categories, difficulty levels, nutritional information, and more. The scraped data is then transformed and uploaded to a database hosted by AWS RDS.
+This Python package scrapes the BBC Good Food website to extract information about recipes. It collects data such as recipe names, cooking times, dietary categories, difficulty levels, nutritional information, ingredients and more. The scraped data is then transformed and uploaded to a database hosted by AWS RDS.
 
 ## Table of Contents
 
@@ -84,7 +84,7 @@ deactivate
 ```
 This will return you to the system-wide Python environment.
 
-Using SQL you can search for recipes using more precise/wider range of filters
+Using SQL you can search for recipes using more precise/a wider range of filters
 
 ## Project Structure
 
@@ -97,9 +97,9 @@ The project structure is as follows:
 - README.md: This file, providing information on the project and how to use it.
 
 ## Motivation
-This project was born out of my passion for health and fitness, and my frustration at not being able to find recpes on the BBC Good Food website that align with specific macronutrient values. I believe that eating well should be both nutritious AND enjoyable (not just chicken and rice...).
+This project was born out of my passion for health and fitness, and my frustration at not being able to find recpes on the BBC Good Food website that align with specific macronutrient values. I believe that eating well should be both nutritious AND enjoyable (not just chicken and rice...). Additionally, what if you have specific ingredients in the fridge and want to find a recipe that uses all of them? This will allow you to search for recipes that use specific ingredients, reducing wasted food.
 
-If you share a desire to cook and eat well I encourage you to download and use this package to access and explore the recipes.
+If you share a desire to cook, eat well AND reduce food waste I encourage you to download and use this package to access and explore the recipes.
 
 
 ## Contact
