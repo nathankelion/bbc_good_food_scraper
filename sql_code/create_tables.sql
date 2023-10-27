@@ -8,12 +8,12 @@ DROP TABLE IF EXISTS recipe_info;
 -- Create the recipe_info table
 CREATE TABLE recipe_info (
     recipe_id		INT PRIMARY KEY NOT NULL,
-    RecipeName		VARCHAR(75),
-    RecipeLink		VARCHAR(100) NOT NULL,
-    CookingTime		TIME(0),
-    HealthStatus	VARCHAR(15),
-	Diet			VARCHAR(15),
-	Difficulty		VARCHAR(15)
+    RecipeName		VARCHAR(100),
+    RecipeLink		VARCHAR(200),
+    CookingTime		VARCHAR(10),
+    HealthStatus	VARCHAR(25),
+	Diet			VARCHAR(25),
+	Difficulty		VARCHAR(25)
 );
 
 -- Create the nutrition table
