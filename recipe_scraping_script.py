@@ -3,9 +3,7 @@ import time
 import math
 import pandas as pd
 from bs4 import BeautifulSoup
-from dotenv import load_dotenv
-import os
-from sqlalchemy import create_engine, text
+from sqlalchemy import text
 
 from scripts.get_recipe_links import get_recipe_links
 from scripts.get_recipe_name import get_recipe_name
@@ -13,6 +11,7 @@ from scripts.get_recipe_cooking_time import get_recipe_cooking_time
 from scripts.get_recipe_nutritional_values import get_recipe_nutritional_values
 from scripts.get_recipe_categories import get_recipe_categories
 from scripts.get_recipe_ingredients import get_recipe_ingredients
+from scripts.sql_connection import Conn, engine
 
 
 # url of the BBC Good Food recipes page
@@ -220,22 +219,6 @@ ingredients_df = pd.DataFrame(flattened_ingredients, columns=['recipe_id', 'Ingr
 # Add recipe_id column based on index to each DataFrame starting from 1
 recipe_info_df.insert(0, 'recipe_id', recipe_info_df.index + 1)
 nutrition_df.insert(0, 'recipe_id', nutrition_df.index + 1)
-
-
-# Load database variables from .env file
-load_dotenv()
-
-# Access database variables
-db_host = os.getenv("DB_HOST")
-db_port = os.getenv("DB_PORT")
-db_name = os.getenv("DB_NAME")
-db_user = os.getenv("DB_USER")
-db_password = os.getenv("DB_PASSWORD")
-
-# Create a SQLAlchemy engine
-connection_string = f"mssql+pyodbc://{db_user}:{db_password}@{db_host}:{db_port}/{db_name}?driver=ODBC+Driver+17+for+SQL+Server&fast_executemany=True"
-engine = create_engine(connection_string)
-Conn = engine.connect()
 
 # Define table names
 recipe_info_table_name = "recipe_info"
