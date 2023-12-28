@@ -1,12 +1,14 @@
-# BBC Good Food Recipe Scraper
+# BBC Good Food Recipe Scraper and Web App
 
-This Python package scrapes the BBC Good Food website to extract information about recipes. It collects data such as recipe names, cooking times, dietary categories, difficulty levels, nutritional information, ingredients and more. The scraped data is then transformed and uploaded to a database hosted by AWS RDS.
+This project consists of two main components: a Python package for scraping the BBC Good Food website to extract recipe information and a Streamlit app that provides a user-friendly interface for non-technical users.
 
 ## Table of Contents
 
 - [Prerequisites](#prerequisites)
 - [Installation](#installation)
 - [Usage](#usage)
+  - [Scraper](#scraper)
+  - [Streamlit App](#streamlit-app)
 - [Project Structure](#project-structure)
 - [Motivation](#motivation)
 - [Contact](#contact)
@@ -25,7 +27,7 @@ Before you can use this package, make sure you have the following prerequisites 
 
 If pip is not installed, you can follow the [installation instructions](https://pip.pypa.io/en/stable/installation/) to install it.
 
-- **Microsoft SQL Server Management Studio** connected to a [free tier AWS](https://portal.aws.amazon.com/billing/signup#/start/email) RDS database instance: You can download and install SSMS from the [official Microsoft website](https://learn.microsoft.com/en-us/sql/ssms/download-sql-server-management-studio-ssms?view=sql-server-ver16) and learn how to connect the two [here](https://www.youtube.com/watch?v=vp_uulb5phM). 
+- **Microsoft SQL Server Management Studio** (SSMS) connected to a [free tier AWS](https://portal.aws.amazon.com/billing/signup#/start/email) RDS database instance: You can download and install SSMS from the [official Microsoft website](https://learn.microsoft.com/en-us/sql/ssms/download-sql-server-management-studio-ssms?view=sql-server-ver16) and learn how to connect the two [here](https://www.youtube.com/watch?v=vp_uulb5phM). 
 
 ## Installation and Setup
 
@@ -33,12 +35,12 @@ To use this package, follow these steps:
 
 1. Open a terminal or command prompt and clone this GitHub repository to your local machine:
     ```
-    git clone https://github.com/nathankelion/bbc_good_food.git
+    git clone https://github.com/nathankelion/bbc_good_food_scraper_and_app.git
     ```
 
 2. Navigate to the project directory:
     ```
-    cd /path/to/your/project/bbc_good_food_scraper
+    cd /path/to/your/project/bbc_good_food_scraper_and_app
     ```
 
 3. Create and activate a virtual environment (optional but recommended):
@@ -55,18 +57,18 @@ To use this package, follow these steps:
 
 4. Install the required dependencies:
     ```
-    pip install -r requirements.txt
+    python -m pip install -r requirements.txt
     ```
 
 ## Usage
-
+### Scraper
 Create a file called `.env` with the following structure:
 ```
-DB_HOST=
-DB_PORT=
-DB_NAME=
-DB_USER=
-DB_PASSWORD=
+DB_HOST=your_database_host
+DB_PORT=your_database_port
+DB_NAME=your_database_name
+DB_USER=your_database_user
+DB_PASSWORD=your_database_password
 ```
 
 Navigate to the `/sql_code/create_tables.sql` open in SSMS and run the queries to create the tables required.
@@ -76,12 +78,21 @@ To run the scraper, use the following command:
 python recipe_scraping_script.py
 ```
 
-The script will scrape data from the BBC Good Food website based on the specified filters, transform the data, and store it in your database hosted by AWS RDS..
+The script will scrape data from the BBC Good Food website, transform the data, and store it in your database hosted by AWS RDS.
+
+### Streamlit App
+Run the Streamlit app using the following command:
+```
+streamlit run app.py
+```
+
+Visit the provided URL in your web browser to access the Streamlit app.
 
 When you're finished with the package, you can deactivate the virtual environment by running:
 ```
 deactivate
 ```
+
 This will return you to the system-wide Python environment.
 
 Using SQL you can search for recipes using more precise/a wider range of filters
@@ -89,9 +100,10 @@ Using SQL you can search for recipes using more precise/a wider range of filters
 ## Project Structure
 
 The project structure is as follows:
-- scripts/: This folder contains the Python functions used for scraping and data processing.
-- sql_code/: This folder contains the sql queries required to create the tables to store scraped data.
+- scripts/: This folder contains the Python functions used for scraping, data processing, and database connection.
+- sql/: This folder contains the sql queries required to create the tables to store scraped data.
 - recipe_scraping_script.py: The main script for scraping BBC Good Food recipes.
+- app.py: The script for the Streamlit app.
 - requirements.txt: A list of required Python packages and their versions.
 - .gitignore: 
 - README.md: This file, providing information on the project and how to use it.
