@@ -72,37 +72,33 @@ if st.button("Clear Search"):
     search_query = ""
 
 # Apply Filters
-# # Apply Search Query using rapidfuzz
-# if search_query:
-#     # Get a list of recipe names from the DataFrame
-#     recipe_names = result_df['RecipeName'].tolist()
+# Apply Search Query using rapidfuzz
+if search_query:
+    # Get a list of recipe names from the DataFrame
+    recipe_names = result_df['RecipeName'].tolist()
 
-#     # Use rapidfuzz to get the best matches with scores
-#     results = process.extract(search_query, recipe_names, scorer=fuzz.partial_ratio, processor=utils.default_process)
+    # Use rapidfuzz to get the best matches with scores
+    results = process.extract(search_query, recipe_names, scorer=fuzz.token_set_ratio, processor=utils.default_process, limit=None)
 
-#     if results:
-#         # Filter matches with scores higher than 50
-#         threshold = 10
-#         filtered_results = [(name, score) for name, score, _ in results if score >= threshold]
+    if results:
+        # Filter matches with scores higher than 50
+        threshold = 50
+        filtered_results = [(name, score) for name, score, _ in results if score >= threshold]
 
-#         if filtered_results:
-#             # Sort filtered results by score in descending order
-#             filtered_results.sort(key=lambda x: x[1], reverse=True)
+        if filtered_results:
+            # Sort filtered results by score in descending order
+            filtered_results.sort(key=lambda x: x[1], reverse=True)
 
-#             st.success("Best Matches:")
+            st.success("Best Matches:")
 
-#             # Create a list of matching recipe names
-#             matching_names = [name for name, _ in filtered_results]
+            # Create a list of matching recipe names
+            matching_names = [name for name, _ in filtered_results]
 
-#             # Filter the DataFrame to include only matching recipes
-#             result_df = result_df[result_df['RecipeName'].isin(matching_names)]
-#         else:
-#             st.warning("No matches found with a score higher than 50.")
-#             result_df = pd.DataFrame()  # Empty DataFrame to display
-#     else:
-#         st.warning("No matches found.")
-#         result_df = pd.DataFrame()  # Empty DataFrame to display
-
+            # Filter the DataFrame to include only matching recipes
+            result_df = result_df[result_df['RecipeName'].isin(matching_names)]
+        else:
+            st.warning("No results found.")
+            result_df = pd.DataFrame()  # Empty DataFrame to display
 
 # Apply ingredients filter
 
