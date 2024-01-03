@@ -82,20 +82,23 @@ if search_query:
 
     if results:
         # Filter matches with scores higher than 50
-        threshold = 50
+        threshold = 60
         filtered_results = [(name, score) for name, score, _ in results if score >= threshold]
 
         if filtered_results:
             # Sort filtered results by score in descending order
             filtered_results.sort(key=lambda x: x[1], reverse=True)
-
             st.success("Best Matches:")
 
             # Create a list of matching recipe names
             matching_names = [name for name, _ in filtered_results]
 
+            # Create a custom ordering column based on the order of matching_names
+            result_df['CustomOrder'] = pd.Categorical(result_df['RecipeName'], categories=matching_names, ordered=True).codes
+
             # Filter the DataFrame to include only matching recipes
-            result_df = result_df[result_df['RecipeName'].isin(matching_names)]
+            result_df = result_df[result_df['RecipeName'].isin(matching_names)].sort_values(by='CustomOrder').drop(columns='CustomOrder')
+
         else:
             st.warning("No results found.")
             result_df = pd.DataFrame()  # Empty DataFrame to display
