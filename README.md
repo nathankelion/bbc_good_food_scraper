@@ -71,7 +71,7 @@ DB_USER=your_database_user
 DB_PASSWORD=your_database_password
 ```
 
-Navigate to the `/sql_code/create_tables.sql` open in SSMS and run the queries to create the tables required.
+Navigate to the `/sql/create_tables.sql` open in SSMS and run the queries to create the tables required.
 
 To run the scraper, use the following command:
 ```
@@ -94,8 +94,6 @@ deactivate
 ```
 
 This will return you to the system-wide Python environment.
-
-Using SQL you can search for recipes using more precise/a wider range of filters
 
 ## Project Structure
 
