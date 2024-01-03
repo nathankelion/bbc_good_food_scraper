@@ -29,18 +29,12 @@ if search_type == "Search Ingredient":
     # Add an ingredient search bar
     new_ingredient = st.text_input("Enter an ingredient", "")
 
-# Convert 'CookingTime' from str to time
-
-
-
-
 # Add a title to the sidebar
 st.sidebar.title('Filter Options')
 
 # Add filters
 # Cooking time tickbox
-selected_cooking_times = st.sidebar.multiselect('Select Cooking Time(s)', ['< 30 minutes' ,'30 minutes - 1 hour', '1-2 hours', '2-3 hours', '3-4 hours', '> 4 hours'])
-
+selected_cooking_times = st.sidebar.multiselect('Select Cooking Time(s)', ['<= 30 minutes' ,'30 minutes - 1 hour', '1-2 hours', '2-3 hours', '3-4 hours', '> 4 hours'])
 
 # Health Status drop-down
 health_status = st.sidebar.selectbox('Health Status', ["I don't mind",'Healthy'])
@@ -116,7 +110,23 @@ if st.button("Clear Search"):
 
 # Apply Cooking Time filter
 
+if selected_cooking_times:
+    # Define your cooking time filters
+    cooking_time_filters = {
+        '<= 30 minutes': result_df['CookingTime'].apply(lambda x: int(x.split(':')[0]) * 60 + int(x.split(':')[1])) <= 30,
+        '30 minutes - 1 hour': (result_df['CookingTime'].apply(lambda x: int(x.split(':')[0]) * 60 + int(x.split(':')[1])) > 30) & (result_df['CookingTime'].apply(lambda x: int(x.split(':')[0]) * 60 + int(x.split(':')[1])) <= 60),
+        '1-2 hours': (result_df['CookingTime'].apply(lambda x: int(x.split(':')[0]) * 60 + int(x.split(':')[1])) > 60) & (result_df['CookingTime'].apply(lambda x: int(x.split(':')[0]) * 60 + int(x.split(':')[1])) <= 120),
+        '2-3 hours': (result_df['CookingTime'].apply(lambda x: int(x.split(':')[0]) * 60 + int(x.split(':')[1])) > 120) & (result_df['CookingTime'].apply(lambda x: int(x.split(':')[0]) * 60 + int(x.split(':')[1])) <= 180),
+        '3-4 hours': (result_df['CookingTime'].apply(lambda x: int(x.split(':')[0]) * 60 + int(x.split(':')[1])) > 180) & (result_df['CookingTime'].apply(lambda x: int(x.split(':')[0]) * 60 + int(x.split(':')[1])) <= 240),
+        '> 4 hours': result_df['CookingTime'].apply(lambda x: int(x.split(':')[0]) * 60 + int(x.split(':')[1])) > 240
+    }
 
+    cooking_time_filter = pd.Series(data=False, index=result_df.index)
+    for selected_time in selected_cooking_times:
+        cooking_time_filter |= cooking_time_filters[selected_time]
+
+    # Apply the combined filter to the DataFrame
+    result_df = result_df[cooking_time_filter]
 
 # Apply Health filter
 if health_status != "I don't mind":
