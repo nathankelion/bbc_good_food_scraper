@@ -11,13 +11,20 @@ st.set_page_config(layout="wide")
 # Display title
 st.title('BBC Good Food Recipe Finder')
 
-# Define the query and call the SQL_query function to get the DataFrame
-query = text('''
-        SELECT DISTINCT ri.RecipeName, ri.CookingTime, ri.HealthStatus, ri.Diet, ri.Difficulty, n.kcal, n.[Fat(g)], n.[Saturates(g)], n.[Carbs(g)], n.[Sugars(g)], n.[Fibre(g)], n.[Protein(g)], n.[Salt(g)], ri.RecipeLink
+# Define the query and call the SQL_query function to get the DataFrame with recipe information
+main_query = text('''
+        SELECT ri.recipe_id, ri.RecipeName, ri.CookingTime, ri.HealthStatus, ri.Diet, ri.Difficulty, n.kcal, n.[Fat(g)], n.[Saturates(g)], n.[Carbs(g)], n.[Sugars(g)], n.[Fibre(g)], n.[Protein(g)], n.[Salt(g)], ri.RecipeLink
         FROM recipe_info    AS ri
         JOIN nutrition      AS n ON ri.recipe_id = n.recipe_id
     ''')
-result_df = SQL_query(query)
+result_df = SQL_query(main_query)
+
+# Define the query and call the SQL_query function to get the DataFrame with ingredient information
+ingredient_query = text('''
+        SELECT *
+        FROM ingredients
+    ''')
+ingredients_df = SQL_query(ingredient_query)
 
 # Radio button to choose between searching for a recipe or an ingredient
 search_type = st.radio("Select Search Type", ["Search Recipe", "Search Ingredient"])
@@ -25,8 +32,8 @@ search_type = st.radio("Select Search Type", ["Search Recipe", "Search Ingredien
 if search_type == "Search Recipe":
     # Add a recipe search bar
     search_query = st.text_input("Search Recipe Name", "")
-if search_type == "Search Ingredient":
-    # Add an ingredient search bar
+elif search_type == "Search Ingredient":
+    # Add an ingredient search bar with a multiselect box
     new_ingredient = st.text_input("Enter an ingredient", "")
 
 # Add a title to the sidebar
@@ -70,10 +77,11 @@ if st.sidebar.button('Remove All Filters'):
 # Add a button to clear the search box
 if st.button("Clear Search"):
     search_query = ""
+    new_ingredient = ""
 
 # Apply Filters
 # Apply Search Query using rapidfuzz
-if search_query:
+if search_type == "Search Recipe" and search_query:
     # Get a list of recipe names from the DataFrame
     recipe_names = result_df['RecipeName'].tolist()
 
@@ -104,11 +112,21 @@ if search_query:
             result_df = pd.DataFrame()  # Empty DataFrame to display
 
 # Apply ingredients filter
+if search_type == "Search Ingredient" and new_ingredient:
 
+    # List of ingredients to search for
+    ingredients_to_search = [new_ingredient]
 
+    # Create a boolean mask for each ingredient
+    ingredient_masks = [ingredients_df['Ingredient'].str.contains(ingredient, case=False) for ingredient in ingredients_to_search]
+
+    # Combine masks using the any condition
+    combined_mask = pd.concat(ingredient_masks, axis=1).all(axis=1)
+    
+    # Apply the mask to filter recipe_info
+    result_df = result_df[result_df['recipe_id'].isin(ingredients_df.loc[combined_mask, 'recipe_id'])]
 
 # Apply Cooking Time filter
-
 if selected_cooking_times:
     # Define your cooking time filters
     cooking_time_filters = {
