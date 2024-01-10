@@ -11,20 +11,25 @@ st.set_page_config(layout="wide")
 # Display title
 st.title('BBC Good Food Recipe Finder')
 
-# Define the query and call the SQL_query function to get the DataFrame with recipe information
-main_query = text('''
-        SELECT ri.recipe_id, ri.RecipeName, ri.CookingTime, ri.HealthStatus, ri.Diet, ri.Difficulty, n.kcal, n.[Fat(g)], n.[Saturates(g)], n.[Carbs(g)], n.[Sugars(g)], n.[Fibre(g)], n.[Protein(g)], n.[Salt(g)], ri.RecipeLink
-        FROM recipe_info    AS ri
-        JOIN nutrition      AS n ON ri.recipe_id = n.recipe_id
-    ''')
-result_df = SQL_query(main_query)
+# Define the query and cache the result using st.cache
+@st.cache_data
+def load_data():
+    main_query = text('''
+            SELECT ri.recipe_id, ri.RecipeName, ri.CookingTime, ri.HealthStatus, ri.Diet, ri.Difficulty, n.kcal, n.[Fat(g)], n.[Saturates(g)], n.[Carbs(g)], n.[Sugars(g)], n.[Fibre(g)], n.[Protein(g)], n.[Salt(g)], ri.RecipeLink
+            FROM recipe_info    AS ri
+            JOIN nutrition      AS n ON ri.recipe_id = n.recipe_id
+        ''')
+    result_df = SQL_query(main_query)
 
-# Define the query and call the SQL_query function to get the DataFrame with ingredient information
-ingredient_query = text('''
-        SELECT *
-        FROM ingredients
-    ''')
-ingredients_df = SQL_query(ingredient_query)
+    ingredient_query = text('''
+            SELECT *
+            FROM ingredients
+        ''')
+    ingredients_df = SQL_query(ingredient_query)
+
+    return result_df, ingredients_df
+
+result_df, ingredients_df = load_data()
 
 # Radio button to choose between searching for a recipe or an ingredient
 search_type = st.radio("Select Search Type", ["Search Recipe", "Search Ingredient"])
@@ -40,7 +45,6 @@ elif search_type == "Search Ingredient":
 st.sidebar.title('Filter Options')
 
 # Add filters
-# Cooking time tickbox
 selected_cooking_times = st.sidebar.multiselect('Select Cooking Time(s)', ['<= 30 minutes' ,'30 minutes - 1 hour', '1-2 hours', '2-3 hours', '3-4 hours', '> 4 hours'])
 
 # Health Status drop-down
@@ -56,6 +60,14 @@ selected_difficulties = st.sidebar.multiselect('Select Difficult(y/ies)', ['Not 
 nutrition_filters = st.sidebar.checkbox('Show/Hide Nutrition Filters')
 
 # Create boxes for filtering by nutrition values
+kcals = []
+fat_content = []
+saturates_content = []
+carbs_content = []
+sugars_content = []
+fibre_content = []
+protein_content = []
+salt_content = []
 if nutrition_filters:
     kcals = st.sidebar.multiselect('How many Calories?', ['<= 250 kcal', '250-500 kcal', '500-750 kcal', '750-1000 kcal', '> 1000 kcal'])
     fat_content = st.sidebar.multiselect('How much Fat?', ['<= 10 g', '10-20 g', '20-30 g', '30-40 g', '> 40 g'])
@@ -68,7 +80,7 @@ if nutrition_filters:
 
 # Add a "Remove All Filters" button
 if st.sidebar.button('Remove All Filters'):
-    cooking_time = []
+    selected_cooking_times = []
     health_status = "I don't mind"
     selected_diet = "I don't mind"
     selected_difficulties = []
