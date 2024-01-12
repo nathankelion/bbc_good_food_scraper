@@ -50,7 +50,7 @@ elif search_type == "Search Ingredient":
         # Display the ingredients to search for
         formatted_ingredients = ', '.join(ingredient.title() for ingredient in st.session_state.ingredients)
         st.subheader('Recipes containing:')
-        st.write(formatted_ingredients)
+        st.success(formatted_ingredients)
 
 # Add a title to the sidebar
 st.sidebar.title('Filter Options')
@@ -111,7 +111,7 @@ if search_type == "Search Recipe" and search_query:
         if filtered_results:
             # Sort filtered results by score in descending order
             filtered_results.sort(key=lambda x: x[1], reverse=True)
-            st.success("Best Matches:")
+            st.success(f"Best Matches for: '{search_query.title()}'")
 
             # Create a list of matching recipe names
             matching_names = [name for name, _ in filtered_results]
