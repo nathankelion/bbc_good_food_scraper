@@ -34,12 +34,23 @@ result_df, ingredients_df = load_data()
 # Radio button to choose between searching for a recipe or an ingredient
 search_type = st.radio("Select Search Type", ["Search Recipe", "Search Ingredient"])
 
+# Initiate session state
+if 'ingredients' not in st.session_state:
+    st.session_state.ingredients = []
+
 if search_type == "Search Recipe":
     # Add a recipe search bar
     search_query = st.text_input("Search Recipe Name", "")
 elif search_type == "Search Ingredient":
     # Add an ingredient search bar with a multiselect box
     new_ingredient = st.text_input("Enter an ingredient", "")
+    if new_ingredient and new_ingredient not in st.session_state.ingredients:
+        st.session_state.ingredients.append(new_ingredient)
+
+        # Display the ingredients to search for
+        formatted_ingredients = ', '.join(ingredient.title() for ingredient in st.session_state.ingredients)
+        st.subheader('Recipes containing:')
+        st.write(formatted_ingredients)
 
 # Add a title to the sidebar
 st.sidebar.title('Filter Options')
@@ -60,14 +71,6 @@ selected_difficulties = st.sidebar.multiselect('Select Difficult(y/ies)', ['Not 
 nutrition_filters = st.sidebar.checkbox('Show/Hide Nutrition Filters')
 
 # Create boxes for filtering by nutrition values
-kcals = []
-fat_content = []
-saturates_content = []
-carbs_content = []
-sugars_content = []
-fibre_content = []
-protein_content = []
-salt_content = []
 if nutrition_filters:
     kcals = st.sidebar.multiselect('How many Calories?', ['<= 250 kcal', '250-500 kcal', '500-750 kcal', '750-1000 kcal', '> 1000 kcal'])
     fat_content = st.sidebar.multiselect('How much Fat?', ['<= 10 g', '10-20 g', '20-30 g', '30-40 g', '> 40 g'])
@@ -89,7 +92,7 @@ if st.sidebar.button('Remove All Filters'):
 # Add a button to clear the search box
 if st.button("Clear Search"):
     search_query = ""
-    new_ingredient = ""
+    st.session_state.ingredients = []
 
 # Apply Filters
 # Apply Search Query using rapidfuzz
@@ -120,23 +123,28 @@ if search_type == "Search Recipe" and search_query:
             result_df = result_df[result_df['RecipeName'].isin(matching_names)].sort_values(by='CustomOrder').drop(columns='CustomOrder')
 
         else:
-            st.warning("No results found.")
+            st.error("No results found.")
             result_df = pd.DataFrame()  # Empty DataFrame to display
 
 # Apply ingredients filter
-if search_type == "Search Ingredient" and new_ingredient:
+if search_type == "Search Ingredient" and st.session_state.ingredients:
+    # Create a DataFrame of True values with the same index as result_df
+    combined_mask = pd.DataFrame(True, index=result_df.index, columns=st.session_state.ingredients)
 
-    # List of ingredients to search for
-    ingredients_to_search = [new_ingredient]
+    for ingredient in st.session_state.ingredients:
+        # Check if the ingredient is present in any row of ingredients_df
+        ingredient_mask = ingredients_df['Ingredient'].str.contains(ingredient, case=False)
 
-    # Create a boolean mask for each ingredient
-    ingredient_masks = [ingredients_df['Ingredient'].str.contains(ingredient, case=False) for ingredient in ingredients_to_search]
+        # Update the corresponding column in combined_mask
+        combined_mask[ingredient] = result_df['recipe_id'].isin(ingredients_df.loc[ingredient_mask, 'recipe_id'])
 
-    # Combine masks using the any condition
-    combined_mask = pd.concat(ingredient_masks, axis=1).all(axis=1)
-    
-    # Apply the mask to filter recipe_info
-    result_df = result_df[result_df['recipe_id'].isin(ingredients_df.loc[combined_mask, 'recipe_id'])]
+    # Combine all ingredient columns using the AND condition
+    combined_mask = combined_mask.all(axis=1)
+
+    # Apply the combined mask to filter result_df
+    result_df = result_df[combined_mask]
+
+
 
 # Apply Cooking Time filter
 if selected_cooking_times:
@@ -322,6 +330,6 @@ st.write(result_df)
 
 # Add a line with your information, using CSS to position it at the bottom
 st.markdown(
-    """<div style='position: fixed; bottom: 10px; width: 100%; text-align: center;'><i>This app was created by Nathan Kelion in 2023.<i></div>""",
+    """<div style='position: fixed; bottom: 10px; width: 100%; text-align: center;'><i>This app was created by Nathan Kelion in 2024.<i></div>""",
     unsafe_allow_html=True
 )
