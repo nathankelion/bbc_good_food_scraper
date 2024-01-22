@@ -41,26 +41,31 @@ if 'ingredients' not in st.session_state:
 if "recipe_text" not in st.session_state:
     st.session_state.recipe_text = ''
 
+# Function to submit a recipe search
 def submit_recipe():
     st.session_state.recipe_text = st.session_state.recipe_widget
     st.session_state.recipe_widget = ''
 
+# Function to submit an ingredient search
+def submit_ingredient():
+    new_ingredient = st.session_state.ingredient_widget
+    if new_ingredient and new_ingredient.title() not in st.session_state.ingredients:
+        st.session_state.ingredients.append(new_ingredient.title())
+
+        # Clear the ingredient search box
+        st.session_state.ingredient_widget = ''
+
+# Recipe search
 if search_type == "Search Recipe":
     # Reset the ingredient search if exiting it
     st.session_state.ingredients = []
     # Add a recipe search bar
     st.text_input("Search Recipe Name", key='recipe_widget', on_change=submit_recipe)
-    recipe_text = st.session_state.recipe_text
+
+# Ingredient search
 elif search_type == "Search Ingredient":
     # Add an ingredient search bar
-    new_ingredient = st.text_input("Enter an ingredient")
-    if new_ingredient and new_ingredient.title() not in st.session_state.ingredients:
-        st.session_state.ingredients.append(new_ingredient.title())
-
-        # Display the ingredients to search for
-        formatted_ingredients = ', '.join(ingredient for ingredient in st.session_state.ingredients)
-        st.subheader('Recipes containing:')
-        st.success(formatted_ingredients)
+    st.text_input("Enter an ingredient", key='ingredient_widget', on_change=submit_ingredient)
 
 # Add a title to the sidebar
 st.sidebar.title('Filter Options')
@@ -101,12 +106,13 @@ if st.sidebar.button('Remove All Filters'):
 
 # Add a button to clear the search box
 if st.button("Clear Search"):
-    recipe_text = ''
     st.session_state.recipe_text = ''
     st.session_state.ingredients = []
 
 # Apply Filters
 # Apply Search Query using rapidfuzz
+recipe_text = st.session_state.recipe_text
+
 if search_type == "Search Recipe" and recipe_text:
     # Get a list of recipe names from the DataFrame
     recipe_names = result_df['RecipeName'].tolist()
@@ -138,11 +144,12 @@ if search_type == "Search Recipe" and recipe_text:
             result_df = pd.DataFrame()  # Empty DataFrame to display
 
 # Apply ingredients filter
-if search_type == "Search Ingredient" and st.session_state.ingredients:
+ingredients_list = st.session_state.ingredients
+if search_type == "Search Ingredient" and len(ingredients_list) > 0:
     # Create a DataFrame of True values with the same index as result_df
-    combined_mask = pd.DataFrame(True, index=result_df.index, columns=st.session_state.ingredients)
+    combined_mask = pd.DataFrame(True, index=result_df.index, columns=ingredients_list)
 
-    for ingredient in st.session_state.ingredients:
+    for ingredient in ingredients_list:
         # Check if the ingredient is present in any row of ingredients_df
         ingredient_mask = ingredients_df['Ingredient'].str.contains(ingredient, case=False)
 
@@ -155,7 +162,10 @@ if search_type == "Search Ingredient" and st.session_state.ingredients:
     # Apply the combined mask to filter result_df
     result_df = result_df[combined_mask]
 
-
+    # Display the ingredients to search for
+    formatted_ingredients = ', '.join(ingredient for ingredient in ingredients_list)
+    st.subheader('Recipes containing:')
+    st.success(formatted_ingredients)
 
 # Apply Cooking Time filter
 if selected_cooking_times:
