@@ -34,21 +34,31 @@ result_df, ingredients_df = load_data()
 # Radio button to choose between searching for a recipe or an ingredient
 search_type = st.radio("Select Search Type", ["Search Recipe", "Search Ingredient"])
 
-# Initiate session state
+# Initiate session states
 if 'ingredients' not in st.session_state:
     st.session_state.ingredients = []
 
+if "recipe_text" not in st.session_state:
+    st.session_state.recipe_text = ''
+
+def submit_recipe():
+    st.session_state.recipe_text = st.session_state.recipe_widget
+    st.session_state.recipe_widget = ''
+
 if search_type == "Search Recipe":
+    # Reset the ingredient search if exiting it
+    st.session_state.ingredients = []
     # Add a recipe search bar
-    search_query = st.text_input("Search Recipe Name", "")
+    st.text_input("Search Recipe Name", key='recipe_widget', on_change=submit_recipe)
+    recipe_text = st.session_state.recipe_text
 elif search_type == "Search Ingredient":
-    # Add an ingredient search bar with a multiselect box
-    new_ingredient = st.text_input("Enter an ingredient", "")
-    if new_ingredient and new_ingredient not in st.session_state.ingredients:
-        st.session_state.ingredients.append(new_ingredient)
+    # Add an ingredient search bar
+    new_ingredient = st.text_input("Enter an ingredient")
+    if new_ingredient and new_ingredient.title() not in st.session_state.ingredients:
+        st.session_state.ingredients.append(new_ingredient.title())
 
         # Display the ingredients to search for
-        formatted_ingredients = ', '.join(ingredient.title() for ingredient in st.session_state.ingredients)
+        formatted_ingredients = ', '.join(ingredient for ingredient in st.session_state.ingredients)
         st.subheader('Recipes containing:')
         st.success(formatted_ingredients)
 
@@ -68,7 +78,7 @@ selected_diet = st.sidebar.selectbox('Select Diet', ["I don't mind", 'Regular', 
 selected_difficulties = st.sidebar.multiselect('Select Difficult(y/ies)', ['Not given', 'Easy', 'More effort', 'A challenge'])
 
 # Would you like nutritional sliders to show?
-nutrition_filters = st.sidebar.checkbox('Show/Hide Nutrition Filters')
+nutrition_filters = st.sidebar.toggle('Enable Nutrition Filters')
 
 # Create boxes for filtering by nutrition values
 if nutrition_filters:
@@ -91,17 +101,18 @@ if st.sidebar.button('Remove All Filters'):
 
 # Add a button to clear the search box
 if st.button("Clear Search"):
-    search_query = ""
+    recipe_text = ''
+    st.session_state.recipe_text = ''
     st.session_state.ingredients = []
 
 # Apply Filters
 # Apply Search Query using rapidfuzz
-if search_type == "Search Recipe" and search_query:
+if search_type == "Search Recipe" and recipe_text:
     # Get a list of recipe names from the DataFrame
     recipe_names = result_df['RecipeName'].tolist()
 
     # Use rapidfuzz to get the best matches with scores
-    results = process.extract(search_query, recipe_names, scorer=fuzz.token_set_ratio, processor=utils.default_process, limit=None)
+    results = process.extract(recipe_text, recipe_names, scorer=fuzz.token_set_ratio, processor=utils.default_process, limit=None)
 
     if results:
         # Filter matches with scores higher than 50
@@ -110,8 +121,8 @@ if search_type == "Search Recipe" and search_query:
 
         if filtered_results:
             # Sort filtered results by score in descending order
-            filtered_results.sort(key=lambda x: x[1], reverse=True)
-            st.success(f"Best Matches for: '{search_query.title()}'")
+            filtered_results.sort(key=lambda x: x[-1], reverse=True)
+            st.success(f"Best Matches for: '{recipe_text.title()}'")
 
             # Create a list of matching recipe names
             matching_names = [name for name, _ in filtered_results]
