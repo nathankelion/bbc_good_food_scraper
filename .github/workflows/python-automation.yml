@@ -18,8 +18,8 @@ jobs:
         with:
           python-version: 3.11.2  # Adjust as needed
 
-    #   - name: Install dependencies
-    #     run: pip install -r requirements.txt
+      - name: Install dependencies
+        run: pip install -r requirements.txt
 
       - name: Run Python script
         env:
