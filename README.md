@@ -98,6 +98,7 @@ This will return you to the system-wide Python environment.
 ## Project Structure
 
 The project structure is as follows:
+- .github/workflows/: This folder contains the .yml file used to automate the running of the recipe scraping script.
 - scripts/: This folder contains the Python functions used for scraping, data processing, and database connection.
 - sql/: This folder contains the sql queries required to create the tables to store scraped data.
 - recipe_scraping_script.py: The main script for scraping BBC Good Food recipes.
