@@ -22,4 +22,6 @@ jobs:
     #     run: pip install -r requirements.txt
 
       - name: Run Python script
+        env:
+            DB_HOST: ${{ secrets.DB_HOST }}
         run: python test.py
