@@ -1,20 +1,20 @@
 # Code for establishing a connection to SQL database
 import os
-from dotenv import load_dotenv
 from sqlalchemy import create_engine
 
 # Check if running in GitHub Actions environment
 if 'GITHUB_ACTIONS' in os.environ:
     # Access repository secrets directly
-    db_host = "${{ secrets.DB_HOST }}"
-    db_port = "${{ secrets.DB_PORT }}"
-    db_name = "${{ secrets.DB_NAME }}"
-    db_user = "${{ secrets.DB_USER }}"
-    db_password = "${{ secrets.DB_PASSWORD }}"
+    db_host = os.getenv("DB_HOST")
+    db_port = os.getenv("DB_PORT")
+    db_name = os.getenv("DB_NAME")
+    db_user = os.getenv("DB_USER")
+    db_password = os.getenv("DB_PASSWORD")
 else:
     # Load database variables from .env file
+    from dotenv import load_dotenv
     load_dotenv()
-    
+
     # Access database variables
     db_host = os.getenv("DB_HOST")
     db_port = os.getenv("DB_PORT")
