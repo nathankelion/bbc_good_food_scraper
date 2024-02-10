@@ -1,9 +1,8 @@
 name: Update Data
 
 on:
-  push:
-    branches:
-      - main  # Adjust this to your default branch
+  schedule:
+    - cron: '0 0 * * 1'  # Run every Monday at midnight (Sunday night)
 
 jobs:
   build:
