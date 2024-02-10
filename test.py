@@ -1,0 +1,1 @@
+print("${{ secrets.DB_HOST }}")
