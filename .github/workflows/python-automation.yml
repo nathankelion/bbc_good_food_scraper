@@ -1,8 +1,8 @@
 name: Update Data
 
-on:
-  schedule:
-    - cron: '0 0 * * 1'  # Run every Monday at midnight (Sunday night)
+# on:
+#   schedule:
+#     - cron: '0 0 * * 1'  # Run every Monday at midnight (Sunday night)
 
 jobs:
   build:
