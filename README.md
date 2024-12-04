@@ -113,10 +113,15 @@ This project was born out of my passion for health and fitness, and my frustrati
 If you share a desire to cook, eat well AND reduce food waste I encourage you to download and use this package to access and explore the recipes.
 
 
-## Contact
+## Contribute
 
-If you have any questions, suggestions, or feedback related to this project, please feel free to get in touch:
+Feel free to fork this project and make contributions. If you encounter any issues or have ideas for improvement, please open an issue or submit a pull request.
 
-- Nathan Kelion
-- nathankelion26@gmail.com
-- Project Repository: [GitHub Repository](https://github.com/nathankelion/bbc_good_food)
+Steps to contribute:
+Fork the repository
+Clone the forked repository
+Create a new branch: git checkout -b feature-branch
+Make your changes
+Commit your changes: git commit -m "Add feature"
+Push to your branch: git push origin feature-branch
+Create a pull request
